@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
 	"time"
 )
 
@@ -11,9 +12,10 @@ func main() {
 	var (
 		config clientv3.Config
 		e error
+		v *mvccpb.KeyValue
 		client *clientv3.Client
 		kv clientv3.KV
-		putResponse *clientv3.PutResponse
+		delResponse *clientv3.DeleteResponse
 	)
 
 	config = clientv3.Config{
@@ -31,14 +33,17 @@ func main() {
 
 	// KV用于读写etcd的键值对
 	kv = clientv3.NewKV(client)
-	fmt.Println(kv)
-	if putResponse, e = kv.Put(context.TODO(), "/cron/jobs/job2", "bbb", clientv3.WithPrevKV()); e != nil {
+
+	if delResponse, e = kv.Delete(context.TODO(),"/cron/jobs/job2", clientv3.WithPrevKV()); e != nil {
 		fmt.Println(e)
 		return
 	}
 
-	if fmt.Println("Revision:", putResponse.Header.Revision); putResponse.PrevKv != nil {
-		fmt.Println("prevValue:", string(putResponse.PrevKv.Value))
+	if len(delResponse.PrevKvs) > 0 {
+		for _, v = range delResponse.PrevKvs {
+			fmt.Println("被删除了:", string(v.Key), string(v.Value))
+		}
 	}
+
 }
 

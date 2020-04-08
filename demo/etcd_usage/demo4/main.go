@@ -13,7 +13,7 @@ func main() {
 		e error
 		client *clientv3.Client
 		kv clientv3.KV
-		putResponse *clientv3.PutResponse
+		getResponse *clientv3.GetResponse
 	)
 
 	config = clientv3.Config{
@@ -31,14 +31,12 @@ func main() {
 
 	// KV用于读写etcd的键值对
 	kv = clientv3.NewKV(client)
-	fmt.Println(kv)
-	if putResponse, e = kv.Put(context.TODO(), "/cron/jobs/job2", "bbb", clientv3.WithPrevKV()); e != nil {
+
+	if getResponse, e = kv.Get(context.TODO(),"/cron/jobs/", clientv3.WithPrefix()); e != nil {
 		fmt.Println(e)
 		return
 	}
 
-	if fmt.Println("Revision:", putResponse.Header.Revision); putResponse.PrevKv != nil {
-		fmt.Println("prevValue:", string(putResponse.PrevKv.Value))
-	}
+	fmt.Println(getResponse.Kvs)
 }
 
