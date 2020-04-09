@@ -23,7 +23,7 @@ func main() {
 	)
 
 	config = clientv3.Config{
-		Endpoints:[]string{"192.168.45.202:2379"},
+		Endpoints:[]string{"192.168.0.202:2379"},
 		DialTimeout:5 * time.Second,
 	}
 
